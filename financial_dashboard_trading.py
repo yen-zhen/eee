@@ -319,9 +319,9 @@ with st.expander("K線圖, 移動平均線與黃金交叉標記"):
                   secondary_y=True)
     
    # 在黃金交叉處添加黑點
-    fig1.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points, 'Time'], y=KBar_df.loc[golden_cross_points, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-up',size=5), name='黃金交叉'), secondary_y=True)
+    fig1.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points, 'Time'], y=KBar_df.loc[golden_cross_points, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-up',size=10), name='黃金交叉'), secondary_y=True)
     
-    fig1.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points, 'Time'], y=KBar_df.loc[death_cross_points, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-down',size=5), name='交叉'), secondary_y=True)
+    fig1.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points, 'Time'], y=KBar_df.loc[death_cross_points, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-down',size=10), name='死亡交叉'), secondary_y=True)
     
     
     
