@@ -163,14 +163,15 @@ KBar_df['MA_short'] = Calculate_MA(KBar_df, period=ShortMAPeriod)
 ##### 尋找最後 NAN值的位置
 last_nan_index_MA = KBar_df['MA_long'][::-1].index[KBar_df['MA_long'][::-1].apply(pd.isna)][0]
 
-# Create a column for Golden Cross and fill it with NaN
-KBar_df['Golden_Cross'] = np.nan
+def find_golden_cross(short_ma, long_ma):
+    golden_cross_points = []
+    for i in range(1, len(short_ma)):
+        if short_ma[i] > long_ma[i] and short_ma[i - 1] < long_ma[i - 1]:
+            # 短期均線從下方穿過長期均線，出現黃金交叉
+            golden_cross_points.append(i)
+    return golden_cross_points
 
-# Identify the rows where Golden Cross occurs and mark them with the corresponding value
-golden_cross_indices = KBar_df.index[last_nan_index_MA+1:]  # Get the indices after the last NaN value
-golden_cross_mask = KBar_df['MA_short'][last_nan_index_MA+1:] > KBar_df['MA_long'][last_nan_index_MA+1:]
-KBar_df.loc[golden_cross_mask, 'Golden_Cross'] = KBar_df.loc[golden_cross_mask, 'MA_long']
-
+golden_cross_points = find_golden_cross(KBar_df['MA_short'], KBar_df['MA_long'])
 
 ######  (ii) RSI 策略 
 ##### 假设 df 是一个包含价格数据的Pandas DataFrame，其中 'close' 是KBar週期收盤價
@@ -305,9 +306,9 @@ with st.expander("K線圖, 移動平均線與黃金交叉標記"):
     fig1.add_trace(go.Scatter(x=KBar_df['Time'][last_nan_index_MA+1:], y=KBar_df['MA_short'][last_nan_index_MA+1:], mode='lines',line=dict(color='pink', width=2), name=f'{ShortMAPeriod}-根 K棒 移動平均線'), 
                   secondary_y=True)
     
-    #### add golden cross markers
-    fig1.add_trace(go.Scatter(x=KBar_df['Time'][last_nan_index_MA+1:], y=KBar_df['Golden_Cross'], mode='markers', marker=dict(color='red', symbol='triangle-up', size=10), name='黃金交叉'), secondary_y=True)
-
+   # 在黃金交叉處添加黑點
+    fig1.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points, 'Time'], y=KBar_df.loc[golden_cross_points, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-up'), name='黃金交叉'), secondary_y=True)
+    
     
     fig1.layout.yaxis2.showgrid=True
     st.plotly_chart(fig1, use_container_width=True)
