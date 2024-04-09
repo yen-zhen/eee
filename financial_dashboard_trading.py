@@ -324,7 +324,15 @@ with st.expander("K線圖, 移動平均線"):
     fig1.add_trace(go.Scatter(x=KBar_df['Time'][last_nan_index_MA+1:], y=KBar_df['MA_short'][last_nan_index_MA+1:], mode='lines',line=dict(color='pink', width=2), name=f'{ShortMAPeriod}-根 K棒 移動平均線'), 
                   secondary_y=True)
 
-    
+     # 找出黃金交叉的時間點
+    golden_cross_points = []
+    for i in range(last_nan_index_MA + 1, len(KBar_df)):
+        if KBar_df['MA_short'][i] > KBar_df['MA_long'][i] and KBar_df['MA_short'][i - 1] <= KBar_df['MA_long'][i - 1]:
+            golden_cross_points.append(i)
+
+    # 在黃金交叉處加入黑點
+    for point in golden_cross_points:
+        fig1.add_trace(go.Scatter(x=[KBar_df['Time'][point]], y=[KBar_df['MA_short'][point]], mode='triangle-up', marker=dict(color='red', size=3), name='黃金交叉'))
     
     fig1.layout.yaxis2.showgrid=True
     st.plotly_chart(fig1, use_container_width=True)
