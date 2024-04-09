@@ -164,28 +164,7 @@ KBar_df['MA_short'] = Calculate_MA(KBar_df, period=ShortMAPeriod)
 ##### 尋找最後 NAN值的位置
 last_nan_index_MA = KBar_df['MA_long'][::-1].index[KBar_df['MA_long'][::-1].apply(pd.isna)][0]
 
-
-# 找到黃金交叉點
-def find_golden_cross(short_ma, long_ma):
-    golden_cross_points = []
-    for i in range(1, len(short_ma)):
-        if short_ma[i] > long_ma[i] and short_ma[i - 1] < long_ma[i - 1]:
-            # 短期均線從下方穿過長期均線，出現黃金交叉
-            golden_cross_points.append(i)
-    return golden_cross_points
-
-golden_cross_points = find_golden_cross(KBar_df['MA_short'], KBar_df['MA_long'])
-
-# 繪製移動平均線圖
-plt.plot(KBar_df['MA_short'], label='Short MA')
-plt.plot(KBar_df['MA_long'], label='Long MA')
-
-# 在黃金交叉點加入黑點
-for point in golden_cross_points:
-    plt.scatter(point, KBar_df['MA_short'][point], color='black', zorder=5)  # zorder 設置點的層級，使其在頂部
-
-plt.legend()
-st.pyplot(plt)
+KBar_df['Golden_Cross'] = np.where(KBar_df['MA_short'][last_nan_index_MA+1:] > KBar_df['MA_long'][last_nan_index_MA+1:], KBar_df['MA_long'][last_nan_index_MA+1:], np.nan)
 
 
 ######  (ii) RSI 策略 
@@ -291,8 +270,6 @@ else:
 
 
 
-
-
 ####### (5) 將 Dataframe 欄位名稱轉換(第一個字母大寫)  ####### 
 KBar_df_original = KBar_df
 KBar_df.columns = [ i[0].upper()+i[1:] for i in KBar_df.columns ]
@@ -307,8 +284,7 @@ import pandas as pd
 import plotly.offline as pyoff
 
 
-###### K線圖, 移動平均線MA
-with st.expander("K線圖, 移動平均線"):
+with st.expander("K線圖, 移動平均線與黃金交叉標記"):
     fig1 = make_subplots(specs=[[{"secondary_y": True}]])
     
     #### include candlestick with rangeselector
@@ -323,20 +299,13 @@ with st.expander("K線圖, 移動平均線"):
                   secondary_y=True)
     fig1.add_trace(go.Scatter(x=KBar_df['Time'][last_nan_index_MA+1:], y=KBar_df['MA_short'][last_nan_index_MA+1:], mode='lines',line=dict(color='pink', width=2), name=f'{ShortMAPeriod}-根 K棒 移動平均線'), 
                   secondary_y=True)
+    
+    #### add golden cross markers
+    fig1.add_trace(go.Scatter(x=KBar_df['Time'][last_nan_index_MA+1:], y=KBar_df['Golden_Cross'], mode='markers', marker=dict(color='red', symbol='triangle-up', size=10), name='黃金交叉'), secondary_y=True)
 
-     # 找出黃金交叉的時間點
-    golden_cross_points = []
-    for i in range(last_nan_index_MA + 1, len(KBar_df)):
-        if KBar_df['MA_short'][i] > KBar_df['MA_long'][i] and KBar_df['MA_short'][i - 1] <= KBar_df['MA_long'][i - 1]:
-            golden_cross_points.append(i)
-
-    # 在黃金交叉處加入黑點
-    for point in golden_cross_points:
-        fig1.add_trace(go.Scatter(x=[KBar_df['Time'][point]], y=[KBar_df['MA_short'][point]], mode='triangle-up', marker=dict(color='red', size=3), name='黃金交叉'))
     
     fig1.layout.yaxis2.showgrid=True
     st.plotly_chart(fig1, use_container_width=True)
-
 
 ###### K線圖, RSI
 with st.expander("K線圖, 長短 RSI"):
