@@ -175,6 +175,7 @@ def find_golden_cross(short_ma, long_ma):
 golden_cross_points = find_golden_cross(KBar_df['MA_short'], KBar_df['MA_long'])
 
 
+
 # 找到死亡交叉點
 def find_death_cross(short_ma, long_ma):
     death_cross_points = []
@@ -254,15 +255,6 @@ KBar_df = Calculate_Bollinger_Bands(KBar_df, period, num_std_dev)
 last_nan_index_BB = KBar_df['SMA'][::-1].index[KBar_df['SMA'][::-1].apply(pd.isna)][0]
 
 
-def find_golden_cross(short_ma, long_ma):
-    golden_cross_points2 = []
-    for i in range(1, len(short_ma)):
-        if short_ma[i] > long_ma[i] and short_ma[i - 1] < long_ma[i - 1]:
-            golden_cross_points2.append(i)
-    return golden_cross_points2
-
-
-golden_cross_points2 = find_golden_cross(df['Short_MA'], df['Long_MA'])
 
 ######  (iv) MACD(異同移動平均線) 策略 
 # 假设df是包含价格数据的Pandas DataFrame，'price'列是每日收盘价格
@@ -294,9 +286,31 @@ if len(nan_indexes_MACD) > 0:
     last_nan_index_MACD = nan_indexes_MACD[0]
 else:
     last_nan_index_MACD = 0
+    
+    
+# 找到MACD的黃金交叉點
+def find_macd_golden_cross(macd, signal):
+    golden_cross_points = []
+    for i in range(1, len(macd)):
+        if macd[i] > signal[i] and macd[i - 1] < signal[i - 1]:
+            # MACD線從下方穿過信號線，出現黃金交叉
+            golden_cross_points.append(i)
+    return golden_cross_points
 
+# 計算MACD的黃金交叉點
+golden_cross_points_MACD = find_macd_golden_cross(KBar_df['MACD'], KBar_df['Signal_Line'])
 
+# 找到MACD的死亡交叉點
+def find_macd_death_cross(macd, signal):
+    death_cross_points = []
+    for i in range(1, len(macd)):
+        if macd[i] < signal[i] and macd[i - 1] > signal[i - 1]:
+            # MACD線從上方穿過信號線，出現死亡交叉
+            death_cross_points.append(i)
+    return death_cross_points
 
+# 計算MACD的死亡交叉點
+death_cross_points_MACD = find_macd_death_cross(KBar_df['MACD'], KBar_df['Signal_Line'])
 
 
 ####### (5) 將 Dataframe 欄位名稱轉換(第一個字母大寫)  ####### 
@@ -370,7 +384,9 @@ with st.expander("K線圖, 布林通道"):
                   secondary_y=False)
     fig3.add_trace(go.Scatter(x=KBar_df['Time'][last_nan_index_BB+1:], y=KBar_df['Lower_Band'][last_nan_index_BB+1:], mode='lines',line=dict(color='blue', width=2), name='布林通道下軌道'), 
                   secondary_y=False)
-    fig3.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points2, 'Time'], y=KBar_df.loc[golden_cross_points2, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-down',size=13), name='黃金交叉'), secondary_y=True)
+    fig3.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points, 'Time'], y=KBar_df.loc[golden_cross_points, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-down',size=13), name='黃金交叉'), secondary_y=True)
+    
+    fig1.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points, 'Time'], y=KBar_df.loc[death_cross_points, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-up',size=13), name='死亡交叉'), secondary_y=True)
     fig3.layout.yaxis2.showgrid=True
 
     st.plotly_chart(fig3, use_container_width=True)
@@ -393,6 +409,9 @@ with st.expander("MACD(異同移動平均線)"):
                   secondary_y=True)
     fig4.add_trace(go.Scatter(x=KBar_df['Time'][last_nan_index_MACD+1:], y=KBar_df['MACD'][last_nan_index_MACD+1:], mode='lines',line=dict(color='pink', width=2), name='DIF'), 
                   secondary_y=True)
+    fig1.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points_MACD, 'Time'], y=KBar_df.loc[golden_cross_points_MACD, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-down',size=13), name='黃金交叉'), secondary_y=True)
+    
+    fig1.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points_MACD, 'Time'], y=KBar_df.loc[death_cross_points_MACD, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-up',size=13), name='死亡交叉'), secondary_y=True)
     
     fig4.layout.yaxis2.showgrid=True
     st.plotly_chart(fig4, use_container_width=True)
