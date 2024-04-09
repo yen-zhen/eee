@@ -386,7 +386,7 @@ with st.expander("K線圖, 布林通道"):
                   secondary_y=False)
     fig3.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points, 'Time'], y=KBar_df.loc[golden_cross_points, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-down',size=13), name='黃金交叉'), secondary_y=True)
     
-    fig1.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points, 'Time'], y=KBar_df.loc[death_cross_points, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-up',size=13), name='死亡交叉'), secondary_y=True)
+    fig3.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points, 'Time'], y=KBar_df.loc[death_cross_points, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-up',size=13), name='死亡交叉'), secondary_y=True)
     fig3.layout.yaxis2.showgrid=True
 
     st.plotly_chart(fig3, use_container_width=True)
@@ -409,9 +409,9 @@ with st.expander("MACD(異同移動平均線)"):
                   secondary_y=True)
     fig4.add_trace(go.Scatter(x=KBar_df['Time'][last_nan_index_MACD+1:], y=KBar_df['MACD'][last_nan_index_MACD+1:], mode='lines',line=dict(color='pink', width=2), name='DIF'), 
                   secondary_y=True)
-    fig1.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points_MACD, 'Time'], y=KBar_df.loc[golden_cross_points_MACD, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-down',size=13), name='黃金交叉'), secondary_y=True)
+    fig4.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points_MACD, 'Time'], y=KBar_df.loc[golden_cross_points_MACD, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-down',size=13), name='黃金交叉'), secondary_y=True)
     
-    fig1.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points_MACD, 'Time'], y=KBar_df.loc[death_cross_points_MACD, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-up',size=13), name='死亡交叉'), secondary_y=True)
+    fig4.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points_MACD, 'Time'], y=KBar_df.loc[death_cross_points_MACD, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-up',size=13), name='死亡交叉'), secondary_y=True)
     
     fig4.layout.yaxis2.showgrid=True
     st.plotly_chart(fig4, use_container_width=True)
