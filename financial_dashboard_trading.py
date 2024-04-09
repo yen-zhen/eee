@@ -160,14 +160,17 @@ ShortMAPeriod=st.slider('設定計算短移動平均線(MA)的 K棒週期數目(
 KBar_df['MA_long'] = Calculate_MA(KBar_df, period=LongMAPeriod)
 KBar_df['MA_short'] = Calculate_MA(KBar_df, period=ShortMAPeriod)
 
+##### 尋找最後 NAN值的位置
 last_nan_index_MA = KBar_df['MA_long'][::-1].index[KBar_df['MA_long'][::-1].apply(pd.isna)][0]
 
 # Create a column for Golden Cross and fill it with NaN
 KBar_df['Golden_Cross'] = np.nan
 
 # Identify the rows where Golden Cross occurs and mark them with the corresponding value
-golden_cross_indices = KBar_df['MA_short'][last_nan_index_MA+1:] > KBar_df['MA_long'][last_nan_index_MA+1:]
-KBar_df.loc[golden_cross_indices, 'Golden_Cross'] = KBar_df['MA_long'][last_nan_index_MA+1:]
+golden_cross_indices = KBar_df.index[last_nan_index_MA+1:]  # Get the indices after the last NaN value
+golden_cross_mask = KBar_df['MA_short'][last_nan_index_MA+1:] > KBar_df['MA_long'][last_nan_index_MA+1:]
+KBar_df.loc[golden_cross_mask, 'Golden_Cross'] = KBar_df.loc[golden_cross_mask, 'MA_long']
+
 
 ######  (ii) RSI 策略 
 ##### 假设 df 是一个包含价格数据的Pandas DataFrame，其中 'close' 是KBar週期收盤價
