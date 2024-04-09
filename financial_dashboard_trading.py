@@ -173,6 +173,18 @@ def find_golden_cross(short_ma, long_ma):
 
 golden_cross_points = find_golden_cross(KBar_df['MA_short'], KBar_df['MA_long'])
 
+
+# 找到死亡交叉點
+def find_death_cross(short_ma, long_ma):
+    death_cross_points = []
+    for i in range(1, len(short_ma)):
+        if short_ma[i] < long_ma[i] and short_ma[i - 1] > long_ma[i - 1]:
+            # 短期均線從上方穿過長期均線，出現死亡交叉
+            death_cross_points.append(i)
+    return death_cross_points
+
+death_cross_points = find_death_cross(KBar_df['MA_short'], KBar_df['MA_long'])
+
 ######  (ii) RSI 策略 
 ##### 假设 df 是一个包含价格数据的Pandas DataFrame，其中 'close' 是KBar週期收盤價
 @st.cache_data(ttl=3600, show_spinner="正在加載資料...")  ## Add the caching decorator
@@ -307,7 +319,10 @@ with st.expander("K線圖, 移動平均線與黃金交叉標記"):
                   secondary_y=True)
     
    # 在黃金交叉處添加黑點
-    fig1.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points, 'Time'], y=KBar_df.loc[golden_cross_points, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-up'), name='黃金交叉'), secondary_y=True)
+    fig1.add_trace(go.Scatter(x=KBar_df.loc[golden_cross_points, 'Time'], y=KBar_df.loc[golden_cross_points, 'Close'], mode='markers', marker=dict(color='red', symbol='triangle-up',size=5), name='黃金交叉'), secondary_y=True)
+    
+    fig1.add_trace(go.Scatter(x=KBar_df.loc[death_cross_points, 'Time'], y=KBar_df.loc[death_cross_points, 'Close'], mode='markers', marker=dict(color='blue', symbol='triangle-down',size=5), name='交叉'), secondary_y=True)
+    
     
     
     fig1.layout.yaxis2.showgrid=True
